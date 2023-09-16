@@ -9,57 +9,48 @@ import java.util.List;
 import java.util.ArrayList;
 import processing.core.PApplet;
 import processing.core.PVector;
+import javazoom.jl.decoder.Bitstream;
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.advanced.AdvancedPlayer;
+import javazoom.jl.player.advanced.PlaybackEvent;
+import javazoom.jl.player.advanced.PlaybackListener;
+import java.io.FileInputStream;
 
 public class FinalProjRhythmGame extends PApplet {
     int currentSensorValueIndex = 0; // 当前传感器数据的索引用于无限循环URL数据 Current sensor data index used for infinite looping of URL data
     List<Float> sensorValues; // List存储传感器的数据值 Store sensor data values
     ArrayList<Firework> fireworks = new ArrayList<Firework>(); // List存储烟花对象 Store Firework objects
-    String apiUrl = "https://eif-research.feit.uts.edu.au/api/csv/?rFromDate=2020-08-15T19%3A06%3A09&rToDate=2020-08-17T19%3A06%3A09&rFamily=wasp&rSensor=ES_B_06_418_7BED&rSubSensor=HUMA";
     float moonX;
+    ArrayList<Integer> timeSeries = new ArrayList<Integer>();//曲包的时间序列  time series of the music package
+    int startTime;
+    boolean musicStarted = false;
+
+    public class TimedEvent {
+        public int x; // x 坐标
+        public int time; // 时间（毫秒）
+
+        public TimedEvent(int x, int time) {
+            this.x = x;
+            this.time = time;
+        }
+    }
+    ArrayList<TimedEvent> timedEvents = new ArrayList<>();
 
     public static void main(String[] args) {
         PApplet.main("FinalProjRhythmGame");
     }
 
     public void settings() {
-        fullScreen(); // 设置画布为全屏 Set canvas to full screen
-    }
-
-    // 从API获取数据 Fetch data from the API
-    private String httpGet(String apiUrl) {
-        StringBuilder result = new StringBuilder();
-        try {
-            URL url = new URL(apiUrl);
-            URLConnection conn = url.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            while ((line = in.readLine()) != null) {
-                result.append(line).append("\n");
-            }
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result.toString();
-    }
-
-    // 从CSV数据中提取传感器的数据值 Extract sensor values from CSV data
-    private List<Float> extractDataValues(String csvData) {
-        List<Float> values = new ArrayList<>();
-        String[] lines = csvData.split("\n");
+        String[] lines = loadStrings("music_package/BadApple/BadAppleHard.txt");
         for (String line : lines) {
-            String[] parts = line.split(",");
-            if (parts.length > 1) {
-                try {
-                    values.add(Float.parseFloat(parts[1]));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-            }
+            String[] parts = line.split(","); // 假设 x 和 time 由逗号分隔
+            int x = Integer.parseInt(parts[0].trim());
+            int time = Integer.parseInt(parts[1].trim());
+            timedEvents.add(new TimedEvent(x, time));
         }
-        return values;
-    }
 
+        fullScreen(); // 设置画布为全屏
+    }
     ArrayList<Star> stars = new ArrayList<Star>(); // List存储星星对象 Store Star objects
 
     public void setupStars() { // 初始化星星 Initialize stars
@@ -79,7 +70,8 @@ public class FinalProjRhythmGame extends PApplet {
             s.update();
             s.display();
         }
-        moonX -= 1;
+
+        if(frameCount%5==0) {moonX -= 1;}
 
         // 检查月亮是否已经离开了屏幕 Check if the moon has left the screen
         if (moonX < -50) {  // 月亮完全离开屏幕 Moon is completely off the screen
@@ -87,51 +79,64 @@ public class FinalProjRhythmGame extends PApplet {
         }
     }
     public void setup() {
-        frameRate(240);  // 将帧数上限设为80
+        frameRate(240);  // 将帧数上限设为240 Set the frame rate limit to 240
         setupStars();
-        sensorValues = extractDataValues(httpGet(apiUrl));
-        print(sensorValues);
+        startTime = millis();
     }
 
     public void draw() {
-        // 绘制星空 Draw the night sky
         drawNightSky();
+        int currentTime = millis();
 
-        // 使用传感器数据生成烟花 Use sensor data to generate fireworks
-        if (frameCount % 30 == 0) {
-            float currentSensorValue = sensorValues.get(currentSensorValueIndex);
-            //这里我用map（）方法，将传感器的数值映射到一个新的范围，然后才能随机生成烟花
-            //Here I use the map() to map the sensor value to a new range, and then I can randomly generate fireworks
-            //currentSensorValue like this -> 61.18626, 61.09955, 61.168922, 61.151573, 61.082203, 61.09954, 61.116882...
-            //区间映射，将50-70的数值映射到0.05-0.5的数值区间 Range mapping, map the value of 50-70 to the value range of 0.05-0.5
-            if (random(1) < map(currentSensorValue, 50.0f, 70.0f, 0.05f, 0.5f)) {
-                fireworks.add(new Firework(this));
-            }
-            currentSensorValueIndex++;  // 更新传感器数据索引 Update sensor data index
+        for (int i = 0; i < timedEvents.size(); i++) {
+            TimedEvent event = timedEvents.get(i);
 
-            // 无限循环传感器数据索引 Infinite looping of sensor data index
-            if (currentSensorValueIndex >= sensorValues.size()) {
-                currentSensorValueIndex = 0;
+            // 缩放 x 坐标
+            int scaledX = (int) map(event.x, 0, 500, 0, width); // 原始 x 坐标的最大值是 500，width 是屏幕宽度
+
+            if (currentTime >= event.time && currentTime <= event.time + 10) { // 50毫秒的容错范围
+                fireworks.add(new Firework(this, scaledX));  // 使用缩放后的 x 坐标
+                timedEvents.remove(i);
+                break;
             }
         }
 
-        // 更新并展示烟花 Update and display fireworks
         for (int i = fireworks.size() - 1; i >= 0; i--) {
-            fireworks.get(i).update();
-            fireworks.get(i).display();
-            if (fireworks.get(i).exploded && fireworks.get(i).particles.size() == 0) {
+            Firework f = fireworks.get(i);
+            f.update();
+            f.display();
+
+            if (f.exploded && f.particles.size() == 0) {
                 fireworks.remove(i);
             }
         }
+        if (!musicStarted && millis() - startTime >= 2000) { // 2秒后开始播放
+            musicStarted = true; // 设置标志，防止多次播放
+
+            try {
+                FileInputStream fileInputStream = new FileInputStream("music_package/BadApple/BadApple.mp3");
+                AdvancedPlayer player = new AdvancedPlayer(fileInputStream);
+
+                player.setPlayBackListener(new PlaybackListener() {
+                    @Override
+                    public void playbackFinished(PlaybackEvent evt) {
+                        System.out.println("Playback finished");
+                    }
+                });
+
+                new Thread(() -> {  // 在新的线程中播放音乐，避免阻塞UI线程
+                    try {
+                        player.play();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    // 计算传感器数据的平均值 Calculate average of sensor data values
-    private float averageSensorValue() {
-        float sum = 0;
-        for (Float value : sensorValues) {
-            sum += value;
-        }
-        return sum / sensorValues.size();
-    }
 }
 

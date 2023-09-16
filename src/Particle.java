@@ -44,7 +44,7 @@ class Particle {
             p.stroke(255, lifespan);
             p.fill(255, lifespan / 2);
             p.strokeWeight(1); // 轮廓减半
-            p.ellipse(position.x, position.y, size / 2, size / 2);  // 大小减半
+            p.ellipse(position.x, position.y, size / 4, size / 4);  // 大小/4
         } else {
             p.stroke(col, lifespan);
             p.strokeWeight(2);
