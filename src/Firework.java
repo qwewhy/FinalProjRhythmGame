@@ -14,7 +14,7 @@ class Firework {
     Firework(PApplet p, int x) {
         this.p = p;
         this.x = x;
-        PVector position = new PVector(p.random(p.width), 0); // 从顶部开始 Start at the top
+        PVector position = new PVector(x, 0); // 从顶部开始 Start at the top
         col = p.color(p.random(100, 255), p.random(100, 255), p.random(100, 255));
         firework = new Particle(p, position, col, 8.0f);
         firework.velocity = new PVector(p.random(-1, 1), p.random(1, 3)); // 向下的速度 Downward velocity
