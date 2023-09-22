@@ -17,7 +17,7 @@ class Firework {
         PVector position = new PVector(x, 0); // 从顶部开始 Start at the top
         col = p.color(p.random(100, 255), p.random(100, 255), p.random(100, 255));
         firework = new Particle(p, position, col, 8.0f);
-        firework.velocity = new PVector(p.random(-1, 1), p.random(1, 3)); // 向下的速度 Downward velocity
+        firework.velocity = new PVector(p.random(-0.2f, 0.2f), p.random(1.9f, 2.1f)); // 向下的速度 Downward velocity
     }
 
     void update() {
@@ -54,4 +54,9 @@ class Firework {
             particles.add(p);
         }
     }
+
+    boolean hit(float mouseX, float mouseY) {
+        return (mouseY >= firework.position.y && mouseY <= firework.position.y + p.height/10);
+    }
+
 }

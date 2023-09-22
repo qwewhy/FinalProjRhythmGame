@@ -22,10 +22,11 @@ public class FinalProjRhythmGame extends PApplet {
     float moonX;
     ArrayList<Integer> timeSeries = new ArrayList<Integer>();//曲包的时间序列  time series of the music package
     int startTime;
+    int score = 0;
+    int totalFireworks = 0;
     boolean musicStarted = false;
-    String package_name = "FlowerDance"; // 只需更改这里的名字即可
+    String package_name = "FlowerDance"; // 严格输入曲名 Strictly enter the song name
     String music_folder = "music_package";
-
     String music_name;
     String music_txt;
     String music_png;
@@ -84,6 +85,19 @@ public class FinalProjRhythmGame extends PApplet {
             stars.add(new Star(this));
         }
     }
+    void dashedLine(float x1, float y1, float x2, float y2, float dashLength, float gapLength) {
+        float distance = dist(x1, y1, x2, y2);
+        float dashAndGap = dashLength + gapLength;
+        float numberOfDashes = distance / dashAndGap;
+        for (float i = 0; i < numberOfDashes; i++) {
+            float startX = lerp(x1, x2, i / numberOfDashes);
+            float startY = lerp(y1, y2, i / numberOfDashes);
+            float endX = lerp(x1, x2, (i * dashAndGap + dashLength) / distance);
+            float endY = lerp(y1, y2, (i * dashAndGap + dashLength) / distance);
+            line(startX, startY, endX, endY);
+        }
+    }
+
 
     public void drawNightSky() {
         background(0, 0, 0);
@@ -102,6 +116,31 @@ public class FinalProjRhythmGame extends PApplet {
         if (moonX < -50) {  // 月亮完全离开屏幕 Moon is completely off the screen
             moonX = width + 50;  // 重新设置月亮的位置 Reset the moon's position
         }
+        float lowerBound = height * 0.7f; // Y/10*7
+        float upperBound = height * 0.9f; // Y/10*9
+        if (fireworks.size() >= 1 && fireworks.size()<5)
+        {
+            stroke(50);  // 设置线条颜色为灰色 Set line color to gray
+        }
+        else if (fireworks.size() >= 5 && fireworks.size()<10)
+        {
+            stroke(100);  // 设置线条颜色为灰色 Set line color to gray
+        }
+        else if (fireworks.size()>=10)
+        {
+            stroke(120,0,0);
+        }
+        else
+        {
+            stroke(10);  // 设置线条颜色为深灰色 Set line color to white
+        }
+        strokeWeight(2); // 设置线条宽度 Set line width
+        float dashLength = 10;  // 虚线的长度 Length of the dash
+        float gapLength = 5;    // 间隙的长度 Length of the gap
+
+        dashedLine(50, lowerBound, width - 50, lowerBound, dashLength, gapLength);
+        dashedLine(50, upperBound, width - 50, upperBound, dashLength, gapLength);
+
     }
     public void setup() {
         frameRate(240);  // 将帧数上限设为240 Set the frame rate limit to 240
@@ -111,6 +150,9 @@ public class FinalProjRhythmGame extends PApplet {
 
     public void draw() {
         drawNightSky();
+        fill(255);
+        textSize(32);
+        text("Score: " + score + "/" + totalFireworks, 10, 30);
         int currentTime = millis();
 
         for (int i = 0; i < timedEvents.size(); i++) {
@@ -121,6 +163,7 @@ public class FinalProjRhythmGame extends PApplet {
 
             if (currentTime >= event.time && currentTime <= event.time + 10) { // 50毫秒的容错范围
                 fireworks.add(new Firework(this, scaledX));  // 使用缩放后的 x 坐标
+                totalFireworks++;
                 timedEvents.remove(i);
                 break;
             }
@@ -159,6 +202,22 @@ public class FinalProjRhythmGame extends PApplet {
 
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        }
+    }
+    public void mousePressed() {
+        float lowerBound = height * 0.7f; // Y/10*7
+        float upperBound = height * 0.9f; // Y/10*9
+
+        // 判定点击是否在规定的范围内
+        if (mouseY >= lowerBound && mouseY <= upperBound) {
+            for (Firework f : fireworks) {
+                float hitRange = 10.0f;
+                // 确保烟花位于点击区域并且点击是在烟花上
+                if (mouseY >= f.firework.position.y - hitRange && mouseY <= f.firework.position.y + height / 10 + hitRange) {
+                    score++;
+                    f.exploded = true; // Explode
+                }
             }
         }
     }
