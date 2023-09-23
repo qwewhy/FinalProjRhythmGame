@@ -1,48 +1,63 @@
 //Hongyuan Wang 25124924
 //SDK corretto-11 Amazon Corretto version 11.0.19 in IDEA
 //processing 3.5.4 ---> core_3.5.4.jar
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.List;
 import java.util.ArrayList;
 import processing.core.PApplet;
-import processing.core.PVector;
-import javazoom.jl.decoder.Bitstream;
-import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.advanced.AdvancedPlayer;
 import javazoom.jl.player.advanced.PlaybackEvent;
 import javazoom.jl.player.advanced.PlaybackListener;
 import java.io.FileInputStream;
 import java.io.File;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.IOException;
+import ddf.minim.*;
+import ddf.minim.analysis.*;
 
 public class FinalProjRhythmGame extends PApplet {
     ArrayList<Firework> fireworks = new ArrayList<Firework>(); // List存储烟花对象 Store Firework objects
     float moonX;
     ArrayList<Integer> timeSeries = new ArrayList<Integer>();//曲包的时间序列  time series of the music package
+    ArrayList<Ripple> ripples = new ArrayList<Ripple>();//波纹效果 ripple effect
+    ArrayList<TimedEvent> timedEvents = new ArrayList<>();
+    ArrayList<Star> stars = new ArrayList<Star>(); // List存储星星对象 Store Star objects
     int startTime;
     int score = 0;
     int totalFireworks = 0;
     boolean musicStarted = false;
-    String package_name = "FlowerDance"; // 严格输入曲名 Strictly enter the song name
+    String package_name = "Komorebi"; // 严格输入曲名 Strictly enter the song name
     String music_folder = "music_package";
     String music_name;
     String music_txt;
     String music_png;
     String music_delay;
     int music_delay_num = 4000;
+    int comboCount = 0;
+
+    public void playWav(String filename) {
+        try {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(filename).getAbsoluteFile());
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioInputStream);
+            clip.start();
+        } catch(UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
+            System.out.println("Error playing .wav file.");
+            ex.printStackTrace();
+        }
+    }
 
     public class TimedEvent {
-        public int x; // x 坐标
-        public int time; // 时间（毫秒）
+        public int x; // x 坐标 x coordinate
+        public int time; // 时间（毫秒） Time (milliseconds)
 
         public TimedEvent(int x, int time) {
             this.x = x;
             this.time = time;
         }
     }
-    ArrayList<TimedEvent> timedEvents = new ArrayList<>();
 
     public static void main(String[] args) {
         PApplet.main("FinalProjRhythmGame");
@@ -77,7 +92,7 @@ public class FinalProjRhythmGame extends PApplet {
 
         fullScreen(); // 设置画布为全屏 Set the canvas to full screen
     }
-    ArrayList<Star> stars = new ArrayList<Star>(); // List存储星星对象 Store Star objects
+
 
     public void setupStars() { // 初始化星星 Initialize stars
         int numStars = 100;
@@ -98,7 +113,6 @@ public class FinalProjRhythmGame extends PApplet {
         }
     }
 
-
     public void drawNightSky() {
         background(0, 0, 0);
         fill(255, 255, 200);
@@ -110,7 +124,7 @@ public class FinalProjRhythmGame extends PApplet {
             s.display();
         }
 
-        if(frameCount%10==0) {moonX -= 1;}
+        if(frameCount%20==0) {moonX -= 1;}// 月亮向左移动 Moon moves left,20帧一次
 
         // 检查月亮是否已经离开了屏幕 Check if the moon has left the screen
         if (moonX < -50) {  // 月亮完全离开屏幕 Moon is completely off the screen
@@ -150,19 +164,48 @@ public class FinalProjRhythmGame extends PApplet {
 
     public void draw() {
         drawNightSky();
-        fill(255);
-        textSize(32);
         text("Score: " + score + "/" + totalFireworks, 10, 30);
+        if (comboCount ==1)
+        {
+            fill(60);
+        }
+        else if (comboCount >1&& comboCount<=5)
+        {
+            fill(80);
+        }
+        else if (comboCount >5&& comboCount<=10)
+        {
+            fill(100);
+        }
+        else if (comboCount >10&& comboCount<=20)
+        {
+            fill(120);
+        }
+        else if (comboCount >20&& comboCount<=40)
+        {
+            fill(130,130,0);
+        }
+        else if (comboCount >40)
+        {
+            fill(255,223,0);
+        }
+        else
+        {
+            fill(30,0,0);
+        }
+        text("Combo: " + comboCount, width / 2 - 60, 50);
+        textSize(32);
+
         int currentTime = millis();
 
         for (int i = 0; i < timedEvents.size(); i++) {
             TimedEvent event = timedEvents.get(i);
 
             // 缩放 x 坐标
-            int scaledX = (int) map(event.x, 0, 500, 200, width-200); // 原始 x 坐标的最大值是 500，width 是屏幕宽度
+            int scaledX = (int) map(event.x, 0, 500, 200, width-200); // 原始 x 坐标的最大值是 500，width 是屏幕宽度 The maximum value of the original x coordinate is 500, width is the screen width
 
-            if (currentTime >= event.time && currentTime <= event.time + 10) { // 50毫秒的容错范围
-                fireworks.add(new Firework(this, scaledX));  // 使用缩放后的 x 坐标
+            if (currentTime >= event.time && currentTime <= event.time + 10) { // 50毫秒的容错范围 50ms fault tolerance range
+                fireworks.add(new Firework(this, scaledX));  // 使用缩放后的 x 坐标 Use scaled x coordinate
                 totalFireworks++;
                 timedEvents.remove(i);
                 break;
@@ -192,7 +235,7 @@ public class FinalProjRhythmGame extends PApplet {
                     }
                 });
 
-                new Thread(() -> {  // 在新的线程中播放音乐，避免阻塞UI线程
+                new Thread(() -> {  // 在新的线程中播放音乐，避免阻塞UI线程 Play music in a new thread to avoid blocking the UI thread
                     try {
                         player.play();
                     } catch (Exception e) {
@@ -204,20 +247,40 @@ public class FinalProjRhythmGame extends PApplet {
                 e.printStackTrace();
             }
         }
-    }
-    public void mousePressed() {
-        float lowerBound = height * 0.7f; // Y/10*7
-        float upperBound = height * 0.9f; // Y/10*9
+        for (int i = ripples.size() - 1; i >= 0; i--) { // 更新并绘制波纹 Update and draw ripples
+            Ripple r = ripples.get(i);
+            r.update();
+            r.display(this);
 
-        // 判定点击是否在规定的范围内
+            if (r.isDone()) {
+                ripples.remove(i);
+            }
+        }
+    }
+
+    public void mousePressed() {
+        float lowerBound = height * 0.7f;
+        float upperBound = height * 0.9f;
+
         if (mouseY >= lowerBound && mouseY <= upperBound) {
+            boolean hitFlag = false;  // 标志是否有烟花被点击 Flag whether a firework is clicked
+
             for (Firework f : fireworks) {
                 float hitRange = 10.0f;
-                // 确保烟花位于点击区域并且点击是在烟花上
                 if (mouseY >= f.firework.position.y - hitRange && mouseY <= f.firework.position.y + height / 10 + hitRange) {
                     score++;
+                    comboCount++;
+                    ripples.add(new Ripple(this, mouseX, mouseY));  // 添加波纹 Add ripple
                     f.exploded = true; // Explode
+                    playWav("CorrectHit.wav"); // 播放音效 Play sound effect
+                    hitFlag = true;  // 设置标志为真，表示有烟花被点击 Set the flag to true to indicate that a firework is clicked
+                    break;  // 如果已经检测到点击，可以跳出循环 If the click has been detected, you can break out of the loop
                 }
+            }
+
+            // 只有当没有任何烟花被点击时，才重置comboCount Only when no fireworks are clicked, reset comboCount
+            if (!hitFlag) {
+                comboCount = 0;
             }
         }
     }

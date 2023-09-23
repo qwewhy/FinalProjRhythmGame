@@ -47,12 +47,12 @@ class Firework {
         }
     }
 
-    void explode() {
-        for (int i = 0; i < 8; i++) {
-            Particle p = new Particle(this.p, firework.position, col, 0.5f);  // Provide a float value here
-            p.velocity = new PVector(this.p.random(-5, 5), this.p.random(-5, 5));
-            particles.add(p);
-        }
+    void explode() {//爆炸烟花效果（暂时删除） Firework explosion effect (temporarily deleted)
+//        for (int i = 0; i < 8; i++) {
+//            Particle p = new Particle(this.p, firework.position, col, 0.5f);  // Provide a float value here
+//            p.velocity = new PVector(this.p.random(-5, 5), this.p.random(-5, 5));
+//            particles.add(p);
+//        }
     }
 
     boolean hit(float mouseX, float mouseY) {

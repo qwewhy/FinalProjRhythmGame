@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="mp3spi1.9.4">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/mp3spi1.9.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/org-jaudiolibs-audioservers.jar!/" />
+      <root url="jar://$PROJECT_DIR$/org-jaudiolibs-audioservers-jack.jar!/" />
+      <root url="jar://$PROJECT_DIR$/org-jaudiolibs-audioservers-javasound.jar!/" />
+      <root url="jar://$PROJECT_DIR$/org-jaudiolibs-jnajack.jar!/" />
+      <root url="jar://$PROJECT_DIR$/tools.jar!/" />
+      <root url="jar://$PROJECT_DIR$/tritonus_aos-0.3.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/tritonus_share.jar!/" />
+      <root url="jar://$PROJECT_DIR$/beads-io.jar!/" />
+      <root url="jar://$PROJECT_DIR$/beads.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

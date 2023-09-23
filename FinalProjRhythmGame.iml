@@ -9,5 +9,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="core_3.5.4" level="project" />
     <orderEntry type="library" name="jl1.0.1" level="project" />
+    <orderEntry type="library" name="mp3spi1.9.4" level="project" />
+    <orderEntry type="library" name="jsminim" level="project" />
   </component>
 </module>
