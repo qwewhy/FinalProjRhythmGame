@@ -6,7 +6,7 @@ import java.util.ArrayList;
 class Firework {
     PApplet p;
     Particle firework;
-    ArrayList<Particle> particles = new ArrayList<>();
+//    ArrayList<Particle> particles = new ArrayList<>();
     boolean exploded = false;
     int col;
     int x;
@@ -17,7 +17,7 @@ class Firework {
         PVector position = new PVector(x, 0); // 从顶部开始 Start at the top
         col = p.color(p.random(100, 255), p.random(100, 255), p.random(100, 255));
         firework = new Particle(p, position, col, 8.0f);
-        firework.velocity = new PVector(p.random(-0.2f, 0.2f), p.random(1.9f, 2.1f)); // 向下的速度 Downward velocity
+        firework.velocity = new PVector(p.random(-0.01f, 0.01f), p.random(1.99f, 2.01f)); // 向下的速度 Downward velocity
     }
 
     void update() {
@@ -30,33 +30,32 @@ class Firework {
             }
         }
 
-        for (int i = particles.size() - 1; i >= 0; i--) {
-            particles.get(i).update();
-            if (particles.get(i).isDead()) {
-                particles.remove(i);
-            }
-        }
+//        for (int i = particles.size() - 1; i >= 0; i--) {
+//            particles.get(i).update();
+//            if (particles.get(i).isDead()) {
+//                particles.remove(i);
+//            }
+//        }
     }
 
     void display() {
         if (!exploded) {
             firework.display();
         }
-        for (Particle particle : particles) {
-            particle.display();
-        }
-    }
-
-    void explode() {//爆炸烟花效果（暂时删除） Firework explosion effect (temporarily deleted)
-//        for (int i = 0; i < 8; i++) {
-//            Particle p = new Particle(this.p, firework.position, col, 0.5f);  // Provide a float value here
-//            p.velocity = new PVector(this.p.random(-5, 5), this.p.random(-5, 5));
-//            particles.add(p);
+//        for (Particle particle : particles) {
+//            particle.display();
 //        }
     }
 
-    boolean hit(float mouseX, float mouseY) {
-        return (mouseY >= firework.position.y && mouseY <= firework.position.y + p.height/10);
+    void explode() {//爆炸烟花效果（暂时删除） Firework explosion effect (temporarily deleted)
+        // 现在这里什么都不做 Now, do nothing here
     }
 
+    boolean hit(float mouseX, float mouseY) {
+        if (mouseY >= firework.position.y && mouseY <= firework.position.y + p.height/10) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
