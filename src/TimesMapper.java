@@ -76,11 +76,19 @@ public class TimesMapper {
         }
     }
 
-    private static void FileWR(String musicPlayingNowTimesPath)
-    {
+    public static void FileWR(String musicPlayingNowTimesPath) {
         List<Integer> results = mapTimes("MissFireWorkTimes.txt", musicPlayingNowTimesPath);
-        writeTimesToFile(results, "MappedTimes.txt");//输出的数据是错误点击或未能点击的音符对应的时间序列
+
+        // 使用 HashSet 来去除重复
+        Set<Integer> uniqueResults = new HashSet<>(results);
+
+        // 为了保持顺序性（如果需要），将 Set 转回 List
+        List<Integer> sortedUniqueResults = new ArrayList<>(uniqueResults);
+        Collections.sort(sortedUniqueResults);
+
+        writeTimesToFile(sortedUniqueResults, "MappedTimes.txt");
     }
+
 
     public static void main(String[] args) {
         List<Integer> results = mapTimes("MissFireWorkTimes.txt", "music_package/HighScore/HighScore.txt");

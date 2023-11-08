@@ -20,6 +20,10 @@ class Firework {
         firework.velocity = new PVector(p.random(-0.01f, 0.01f), p.random(1.99f, 2.01f)); // 向下的速度 Downward velocity
     }
 
+    public int getX() {
+        return x;
+    }
+
     void update() {
         if (!exploded) {
             firework.update();

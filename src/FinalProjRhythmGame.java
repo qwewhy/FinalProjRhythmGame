@@ -18,9 +18,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.Path;
-import javax.swing.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
 
 
 public class FinalProjRhythmGame extends PApplet {
@@ -68,6 +68,7 @@ public class FinalProjRhythmGame extends PApplet {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         fullScreen(); // 设置画布为全屏 Set the canvas to full screen
     }
     public void setup() {
@@ -93,7 +94,8 @@ public class FinalProjRhythmGame extends PApplet {
                 GameMainController();
                 break;
             case END:
-                //drawEndScreen();
+                TimesMapper.FileWR(music_txt);
+
                 break;
         }
     }
@@ -105,6 +107,7 @@ public class FinalProjRhythmGame extends PApplet {
         music_png = music_folder + "/" + package_name + "/" + package_name + ".jpg";
         music_delay = music_folder + "/" + package_name + "/" + package_name+"_delay" + ".txt"; //曲子播放延迟时间数据存储路径 Path to store song playback delay time data
         fireworks_delay = music_folder + "/" + package_name + "/" + package_name+"_Fireworksdelay" + ".txt";
+
         // 初始化为默认值 Initialize to default value
         music_delay_num = 4000;
         fireworks_delay_num = 0;
@@ -184,17 +187,28 @@ public class FinalProjRhythmGame extends PApplet {
                 if (mouseY >= f.firework.position.y - hitRange && mouseY <= f.firework.position.y + height / 10 + hitRange) {
                     score++;
                     comboCount++;
-                    ripples.add(new Ripple(this, mouseX, mouseY));  // 添加波纹 Add ripple
-                    f.exploded = true; // Explode
-                    playWav("CorrectHit.wav"); // 播放音效 Play sound effect
-                    hitFlag = true;  // 设置标志为真，表示有烟花被点击 Set the flag to true to indicate that a firework is clicked
-                    break;  // 如果已经检测到点击，可以跳出循环 If the click has been detected, you can break out of the loop
+                    // 检查连击状态，如果 comboCount 大于 5，传递 true 给 Ripple 构造函数
+                    boolean isCombo = comboCount > 5;
+                    // 现在传递所有必需的参数给 Ripple 构造函数，包括 combo 状态
+                    ripples.add(new Ripple(this, mouseX, mouseY, isCombo));
+                    f.exploded = true;
+                    playWav("CorrectHit.wav");
+                    hitFlag = true;
+                    break;
                 }
             }
 
             // 当没有任何烟花被点击时，重置comboCount Only when no fireworks are clicked, reset comboCount
             if (!hitFlag) {
                 comboCount = 0;
+                String filename = "MissFireWorkTimes.txt";
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
+                    long relativeTime = millis() - startTime; // 获取从程序开始运行的相对时间 Get relative time from program start
+                    bw.write(Long.toString(relativeTime));
+                    bw.newLine();  // 新的一行 New line
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             hitFlag = false;  // 重置标志 Reset flag
         }
@@ -258,7 +272,8 @@ public class FinalProjRhythmGame extends PApplet {
         }
         for (int i = ripples.size() - 1; i >= 0; i--) { // 更新并绘制波纹 Update and draw ripples
             Ripple r = ripples.get(i);
-            r.update();
+            // 现在传递当前的 comboCount 给 update 方法
+            r.update(comboCount);
             r.display(this);
 
             if (r.isDone()) {
