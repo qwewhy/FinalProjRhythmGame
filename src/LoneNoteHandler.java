@@ -2,10 +2,8 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-// 假设存在 Firework, Ripple, TimedEvent 类
-// Assuming that classes Firework, Ripple, and TimedEvent exist
 
-public class LongNoteHandler {
+public class LoneNoteHandler {
     PApplet parent; // For handling Processing's functions
     ArrayList<Firework> fireworks;
     ArrayList<Ripple> ripples;
@@ -14,7 +12,7 @@ public class LongNoteHandler {
     int score;
     final int X_DISTANCE_THRESHOLD = 50; // X轴间隔小于50的阈值
 
-    public LongNoteHandler(PApplet p, ArrayList<Firework> fireworks, ArrayList<Ripple> ripples, float moonX, int comboCount, int score) {
+    public LoneNoteHandler(PApplet p, ArrayList<Firework> fireworks, ArrayList<Ripple> ripples, float moonX, int comboCount, int score) {
         this.parent = p;
         this.fireworks = fireworks;
         this.ripples = ripples;
@@ -57,7 +55,8 @@ public class LongNoteHandler {
         Firework startFirework = closeFireworks.get(0);
         Firework endFirework = closeFireworks.get(closeFireworks.size() - 1);
 
-        Ripple longNoteRipple = new Ripple(parent, startFirework.getX(), endFirework.getX());
+        // Cast the int to float when calling the Ripple constructor
+        Ripple longNoteRipple = new Ripple(parent, (float)startFirework.getX(), (float)endFirework.getX(), true); // Assuming isCombo should be true
         ripples.add(longNoteRipple);
 
         for (Iterator<Firework> iterator = closeFireworks.iterator(); iterator.hasNext();) {

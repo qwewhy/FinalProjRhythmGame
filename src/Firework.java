@@ -23,6 +23,9 @@ class Firework {
     public int getX() {
         return x;
     }
+    public int getY() {
+        return (int)firework.position.y;
+    }
 
     void update() {
         if (!exploded) {

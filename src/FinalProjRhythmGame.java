@@ -3,6 +3,7 @@
 //processing 3.5.4 ---> core_3.5.4.jar
 import java.util.ArrayList;
 import processing.core.PApplet;
+import processing.core.PVector;
 import javazoom.jl.player.advanced.AdvancedPlayer;
 import javazoom.jl.player.advanced.PlaybackEvent;
 import javazoom.jl.player.advanced.PlaybackListener;
@@ -30,6 +31,7 @@ public class FinalProjRhythmGame extends PApplet {
     ArrayList<Ripple> ripples = new ArrayList<Ripple>();//波纹效果 ripple effect
     ArrayList<TimedEvent> timedEvents = new ArrayList<>();
     ArrayList<Star> stars = new ArrayList<Star>(); // List存储星星对象 Store Star objects
+    ArrayList<BonusHalo> bonusHalos = new ArrayList<BonusHalo>(); // 奖励光圈的列表 List of bonus halos
     int startTime;
     int score = 0;
     int totalFireworks = 0;
@@ -212,12 +214,23 @@ public class FinalProjRhythmGame extends PApplet {
             }
             hitFlag = false;  // 重置标志 Reset flag
         }
+
+        for (int i = bonusHalos.size() - 1; i >= 0; i--) {
+            BonusHalo halo = bonusHalos.get(i);
+            if (halo.contains(mouseX, mouseY)) {
+                halo.clicked();
+                score += 5; // 比如点击奖励光圈增加5分 For example, clicking on the bonus halo adds 5 points
+                comboCount = 0; // 重置连击数 Reset combo count
+            }
+        }
     }
 
     public void GameMainController()
     {
         drawNightSky();
         ComboJudge();
+        updateAndDisplayHalos();
+        createBonusHalo();
         int currentTime = millis();
 
         for (int i = 0; i < timedEvents.size(); i++) {
@@ -342,7 +355,7 @@ public class FinalProjRhythmGame extends PApplet {
         ellipse(moonX, height * 0.25f, 100, 100);  // Draw the moon
 
         for (Star s : stars) {
-            s.update();
+            s.update(fireworks);
             s.display();
         }
 
@@ -379,9 +392,42 @@ public class FinalProjRhythmGame extends PApplet {
 
     }
     public void setupStars() { // 初始化星星 Initialize stars
-        int numStars = 100;
+        int numStars = 800;
         for (int i = 0; i < numStars; i++) {
             stars.add(new Star(this));
+        }
+    }
+    public void createBonusHalo() {
+        float x = 0; // Initialize outside the if block
+        float y = 0; // Initialize outside the if block
+
+        // 只有当comboCount等于3且bonusHalos为空时，才会创建光环
+        if (comboCount == 3 && bonusHalos.isEmpty()) {
+            // 生成光环的随机位置
+            x = random(width * 0.2f, width * 0.8f);
+            y = random(height * 0.2f, height * 0.8f);
+
+            // 添加新的BonusHalo对象
+            bonusHalos.add(new BonusHalo(this, x, y));
+
+            PVector haloCenter = new PVector(x, y);
+
+            // 现在让光环附近的星星开始围绕新创建的光环移动
+            for (Star star : stars) {
+                star.startOrbiting(haloCenter);
+            }
+        }
+    }
+
+
+    public void updateAndDisplayHalos() {
+        for (int i = bonusHalos.size() - 1; i >= 0; i--) {
+            BonusHalo halo = bonusHalos.get(i);
+            halo.update();
+            halo.display();
+            if (!halo.active) {
+                bonusHalos.remove(i); // 删除不活跃的光圈 Remove inactive halos
+            }
         }
     }
 }
