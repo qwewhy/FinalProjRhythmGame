@@ -38,8 +38,8 @@ public class FinalProjRhythmGame extends PApplet {
     boolean musicStarted = false;
     public String package_name = "BadApple";
     String music_folder = "music_package";
-    String music_name;
-    String music_txt;
+    public String music_name;
+    public String music_txt;
     String music_png;
     String music_delay;
     String fireworks_delay;
@@ -54,6 +54,7 @@ public class FinalProjRhythmGame extends PApplet {
     }
     GameState currentState = GameState.MENU;
     MenuScreen menuScreen;
+    EndScreen endScreen;
     boolean musicFlag = true;
 
 
@@ -64,12 +65,12 @@ public class FinalProjRhythmGame extends PApplet {
     public void settings() {
         //清除txt中的所有内容,以便本次游戏重新记录错误数据 Clear all content in txt so that this game can re-record data
         //Helper function to clear or create file content
-        try {
-            clearOrCreateFile("MissFireWorkTimes.txt");
-            clearOrCreateFile("MappedTimes.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            clearOrCreateFile("MissFireWorkTimes.txt");
+//            clearOrCreateFile("MappedTimes.txt");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         fullScreen(); // 设置画布为全屏 Set the canvas to full screen
     }
@@ -80,8 +81,12 @@ public class FinalProjRhythmGame extends PApplet {
         openCVController = new OpenCV();
         menuScreen = new MenuScreen(this);
         menuScreen.initialize();
+        endScreen = new EndScreen(this);
+        endScreen.initialize();
+        System.out.println(currentState);
     }
     public void draw() {
+        System.out.println(currentState);
         int referenceTime = startTime + music_delay_num;
         if (musicFlag == true)
         {
@@ -90,6 +95,7 @@ public class FinalProjRhythmGame extends PApplet {
         }
         switch(currentState) {
             case MENU:
+//                endScreen.display();
                 menuScreen.display();
                 break;
             case PLAYING:
@@ -97,7 +103,7 @@ public class FinalProjRhythmGame extends PApplet {
                 break;
             case END:
                 TimesMapper.FileWR(music_txt);
-
+                endScreen.display();
                 break;
         }
     }
@@ -179,6 +185,10 @@ public class FinalProjRhythmGame extends PApplet {
 
         if (currentState == GameState.MENU) {
             menuScreen.mouseClicked();
+        }
+        if(currentState == GameState.END)
+        {
+            endScreen.mousePressed();
         }
 
         if (mouseY >= lowerBound && mouseY <= upperBound) {
@@ -392,7 +402,7 @@ public class FinalProjRhythmGame extends PApplet {
 
     }
     public void setupStars() { // 初始化星星 Initialize stars
-        int numStars = 800;
+        int numStars = 600;
         for (int i = 0; i < numStars; i++) {
             stars.add(new Star(this));
         }
@@ -418,7 +428,6 @@ public class FinalProjRhythmGame extends PApplet {
             }
         }
     }
-
 
     public void updateAndDisplayHalos() {
         for (int i = bonusHalos.size() - 1; i >= 0; i--) {

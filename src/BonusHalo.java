@@ -13,6 +13,7 @@ class BonusHalo {
     boolean expanding; // 圆环是否正在扩大
     float haloSize; // 圆环的当前尺寸
     ArrayList<Ripple> ripples;
+    ScoreEffect scoreEffect; // 用于显示分数效果的实例
 
 
     BonusHalo(PApplet p, float x, float y) {
@@ -42,6 +43,12 @@ class BonusHalo {
                 ripples.remove(i);
             }
         }
+        if (scoreEffect != null) {
+            scoreEffect.update();
+            if (scoreEffect.isDone()) {
+                scoreEffect = null;
+            }
+        }
     }
 
     void display() {
@@ -52,12 +59,29 @@ class BonusHalo {
 
         // 然后画光环
         if (active) {
-            parent.stroke(173, 255, 47, alpha);
-            parent.strokeWeight(10);
-            parent.noFill();
-            parent.ellipse(position.x, position.y, 50, 50);
+            int numGradients = 12; // 渐变层数
+            float maxRadius = 25; // 最大半径
+            float minRadius = 15; // 最小半径，增加以扩大空洞的大小
+            for (int i = 0; i < numGradients; i++) {
+                // 计算每一层的透明度和半径
+                float gradientAlpha = PApplet.map(i, 0, numGradients-1, alpha, 0);
+                float radius = PApplet.lerp(minRadius, maxRadius, (float)i / (numGradients-1));
+                // 设置颜色，颜色由深蓝到稍微浅一点的蓝色的渐变，不再是完全黑色
+                float blueValue = PApplet.lerp(255, 60, (float)i / (numGradients-1)); // 末端值从0改为60，这样最外层不会是完全的黑色
+                parent.stroke(0, 0, blueValue, gradientAlpha);
+                parent.strokeWeight(2); // 将画笔宽度设置得更细，以减小圆环的粗细
+                parent.noFill();
+                parent.ellipse(position.x, position.y, radius * 2, radius * 2);
+            }
+        }
+
+        if (scoreEffect != null) {
+            scoreEffect.display();
         }
     }
+
+
+
 
     boolean contains(float x, float y) {
         // 检查鼠标点击是否在光圈内 Check if mouse click is within the halo
@@ -70,6 +94,8 @@ class BonusHalo {
 
             // 创建新的波纹对象
             ripples.add(new Ripple(parent, position.x, position.y, false));
+            // 创建并显示加分效果
+            scoreEffect = new ScoreEffect(parent, position.x, position.y, "+5");
         }
     }
 
