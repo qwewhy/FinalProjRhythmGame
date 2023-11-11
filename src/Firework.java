@@ -17,7 +17,7 @@ class Firework {
         PVector position = new PVector(x, 0); // 从顶部开始 Start at the top
         col = p.color(p.random(100, 255), p.random(100, 255), p.random(100, 255));
         firework = new Particle(p, position, col, 8.0f);
-        firework.velocity = new PVector(p.random(-0.01f, 0.01f), p.random(1.99f, 2.01f)); // 向下的速度 Downward velocity
+        firework.velocity = new PVector(p.random(-0.01f, 0.01f), p.random(0.59f, 0.61f)); // 向下的速度 Downward velocity
     }
 
     public int getX() {
@@ -55,7 +55,7 @@ class Firework {
     }
 
     void explode() {//爆炸烟花效果（暂时删除） Firework explosion effect (temporarily deleted)
-        // 现在这里什么都不做 Now, do nothing here
+
     }
 
     boolean hit(float mouseX, float mouseY) {

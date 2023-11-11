@@ -26,7 +26,7 @@ public class MenuScreen {
 
     private void loadSongs() {
         File musicDir = new File(mainApp.sketchPath() + "/music_package");
-        songs = musicDir.listFiles(File::isDirectory); // 获取所有歌曲目录
+        songs = musicDir.listFiles(File::isDirectory); // 获取所有歌曲目录 get all song directories
 
         songIcons = new PImage[songs.length];
         songNames = new String[songs.length];
@@ -45,17 +45,17 @@ public class MenuScreen {
             }
         }
     }
-    int selectedSongIndex = -1; // 新增变量，用于存储被选中的歌曲的索引
+    int selectedSongIndex = -1; // 新增变量，用于存储被选中的歌曲的索引 Add a new variable to store the index of the selected song
     public void display() {
-        mainApp.background(0);  // 设定背景为纯黑色
+        mainApp.background(0);  // 设定背景为纯黑色 set the background to black
 
         int rows = 3;
         int cols = 3;
         int iconSize = 200;
         int spacing = 30;  // 增加间距
 
-        int startX = (mainApp.width - (cols * iconSize + (cols - 1) * spacing)) / 2;  // 居中对齐
-        int startY = (mainApp.height - (rows * (iconSize + spacing) - spacing)) / 2;  // 居中对齐
+        int startX = (mainApp.width - (cols * iconSize + (cols - 1) * spacing)) / 2;  // 居中对齐 Center alignment
+        int startY = (mainApp.height - (rows * (iconSize + spacing) - spacing)) / 2;  // 居中对齐 Center alignment
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -69,7 +69,7 @@ public class MenuScreen {
                 }
             }
         }
-        // 高亮选中的歌曲图标
+        // 高亮选中的歌曲图标 Highlight the selected song icon
         if (selectedSongIndex != -1) {
             int row = (selectedSongIndex % SONGS_PER_PAGE) / cols;
             int col = (selectedSongIndex % SONGS_PER_PAGE) % cols;
@@ -163,20 +163,3 @@ public class MenuScreen {
     }
 }
 
-
-// 绘制一个窗口，显示游戏的每个乐曲的图标（jpg/png）+标题和开始按钮。一首乐曲，上方是图标，下方是名字。
-// 乐曲以曲包的形式储存，每个曲包有里面有一个jpg/png文件（做为乐曲图标）、一个mp3文件和两个txt文档，本类属于菜单功能，不涉及曲包内txt文档的使用。
-// 文件结构如下：music_package
-//      -BrainPower
-//      -CountingStars
-//      ......(约20首曲子，可随意添加)
-//      -BadApple
-//      --BadApple.jpg， BadApple.mp3， BadApple.txt， BadApple_delay.txt
-//      ......
-// 因此在此方法中，菜单选择界面要做到屏幕上同时出现9首曲子以九宫格的形式排列（曲子图标在上，曲名在下），要有翻页功能让用户浏览后面的曲子。
-// 用户可以根据自己的喜好点击选择曲子后，主方法类中的String package_name = "Trane"; // 严格输入曲名 应当被改变，改变名字为用户选择的曲包名。（曲包名在命名时已经严格保持和乐曲名字一致）
-// 例如：-BadApple
-// --BadApple.jpg， BadApple.mp3， BadApple.txt， BadApple_delay.txt。假如用户选择了BadApple，那么主方法类中的package_name = "BadApple"; 即可
-// 点击开始按钮，枚举值在主方法中被改变，主方法类中的draw()进入GameMainController()，开始游戏;
-// 用户也可以点击退出按钮，关闭程序退出游戏。
-// 主方法中的draw()进入GameMainController()完全可以正常游戏，请放心。

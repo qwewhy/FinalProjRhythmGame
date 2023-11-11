@@ -52,7 +52,7 @@ public class FinalProjRhythmGame extends PApplet {
     enum GameState {
         MENU, PLAYING, END
     }
-    GameState currentState = GameState.END;
+    GameState currentState = GameState.MENU;
     MenuScreen menuScreen;
     EndScreen endScreen;
     boolean musicFlag = true;
@@ -63,15 +63,12 @@ public class FinalProjRhythmGame extends PApplet {
     }
 
     public void settings() {
-        //清除txt中的所有内容,以便本次游戏重新记录错误数据 Clear all content in txt so that this game can re-record data
-        //Helper function to clear or create file content
+ //       清除txt中的所有内容,以便本次游戏重新记录错误数据 Clear all content in txt so that this game can re-record data
         try {
             clearOrCreateFile("MissFireWorkTimes.txt");
-            clearOrCreateFile("MappedTimes.txt");
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         fullScreen(); // 设置画布为全屏 Set the canvas to full screen
     }
     public void setup() {
@@ -81,8 +78,7 @@ public class FinalProjRhythmGame extends PApplet {
         openCVController = new OpenCV();
         menuScreen = new MenuScreen(this);
         menuScreen.initialize();
-//        EndScreen = new EndScreen(this);
-        // EndScreen.initialize();
+        endScreen = new EndScreen(this, this);
     }
     public void draw() {
         int referenceTime = startTime + music_delay_num;
@@ -94,13 +90,18 @@ public class FinalProjRhythmGame extends PApplet {
         switch(currentState) {
             case MENU:
                 menuScreen.display();
+                try {
+                    clearOrCreateFile("MappedTimes.txt");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 break;
             case PLAYING:
+                TimesMapper.FileWR(music_txt);
                 GameMainController();
                 break;
             case END:
-                TimesMapper.FileWR(music_txt);
-
+                endScreen.display(score, totalFireworks);
                 break;
         }
     }
@@ -144,7 +145,7 @@ public class FinalProjRhythmGame extends PApplet {
     }
     public void ComboJudge()
     {
-        text("Score: " + score + "/" + totalFireworks, 10, 30);
+        text("Score: " + score + "/" + totalFireworks, 80, 30);
         if (comboCount ==1)
         {
             fill(60);
@@ -183,6 +184,11 @@ public class FinalProjRhythmGame extends PApplet {
         if (currentState == GameState.MENU) {
             menuScreen.mouseClicked();
         }
+        // 当游戏状态为 END 时，处理 EndScreen 的点击事件
+        if (currentState == GameState.END) {
+            endScreen.mouseClicked();
+        }
+
 
         if (mouseY >= lowerBound && mouseY <= upperBound) {
             boolean hitFlag = false;  // 标志是否有烟花被点击 Flag whether a firework is clicked
@@ -269,6 +275,7 @@ public class FinalProjRhythmGame extends PApplet {
                 player.setPlayBackListener(new PlaybackListener() {
                     @Override
                     public void playbackFinished(PlaybackEvent evt) {
+                        TimesMapper.FileWR(music_txt);
                         System.out.println("Playback finished");
                         currentState = GameState.END;
                     }

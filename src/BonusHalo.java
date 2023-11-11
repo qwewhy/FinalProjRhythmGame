@@ -53,17 +53,17 @@ class BonusHalo {
 
         // 然后画光环
         if (active) {
-            int numGradients = 12; // 渐变层数
-            float maxRadius = 25; // 最大半径
-            float minRadius = 15; // 最小半径，增加以扩大空洞的大小
+            int numGradients = 12; // 渐变层数 Number of gradients
+            float maxRadius = 25; // 最大半径 Max radius
+            float minRadius = 15; // 最小半径，增加以扩大空洞的大小 Min radius, increase to enlarge the size of the hole
             for (int i = 0; i < numGradients; i++) {
-                // 计算每一层的透明度和半径
+                // 计算每一层的透明度和半径 Calculate the transparency and radius of each layer
                 float gradientAlpha = PApplet.map(i, 0, numGradients-1, alpha, 0);
                 float radius = PApplet.lerp(minRadius, maxRadius, (float)i / (numGradients-1));
-                // 设置颜色，颜色由深蓝到稍微浅一点的蓝色的渐变，不再是完全黑色
-                float blueValue = PApplet.lerp(255, 60, (float)i / (numGradients-1)); // 末端值从0改为60，这样最外层不会是完全的黑色
+                // 设置颜色，颜色由深蓝到稍微浅一点的蓝色的渐变，不再是完全黑色 Set the color, the color is a gradient from dark blue to slightly lighter blue, no longer completely black
+                float blueValue = PApplet.lerp(255, 60, (float)i / (numGradients-1)); // 末端值从0改为60，这样最外层不会是完全的黑色 End value changed from 0 to 60, so that the outermost layer will not be completely black
                 parent.stroke(0, 0, blueValue, gradientAlpha);
-                parent.strokeWeight(2); // 将画笔宽度设置得更细，以减小圆环的粗细
+                parent.strokeWeight(2); // 将画笔宽度设置得更细，以减小圆环的粗细 Make the brush width thinner to reduce the thickness of the halo
                 parent.noFill();
                 parent.ellipse(position.x, position.y, radius * 2, radius * 2);
             }
@@ -82,7 +82,7 @@ class BonusHalo {
         if (active) {
             active = false;
 
-            // 创建新的波纹对象
+            // 创建新的波纹对象 Create a new ripple object
             ripples.add(new Ripple(parent, position.x, position.y, false));
         }
     }
