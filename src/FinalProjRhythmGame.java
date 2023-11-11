@@ -52,8 +52,9 @@ public class FinalProjRhythmGame extends PApplet {
     enum GameState {
         MENU, PLAYING, END
     }
-    GameState currentState = GameState.MENU;
+    GameState currentState = GameState.END;
     MenuScreen menuScreen;
+    EndScreen endScreen;
     boolean musicFlag = true;
 
 
@@ -80,6 +81,8 @@ public class FinalProjRhythmGame extends PApplet {
         openCVController = new OpenCV();
         menuScreen = new MenuScreen(this);
         menuScreen.initialize();
+//        EndScreen = new EndScreen(this);
+        // EndScreen.initialize();
     }
     public void draw() {
         int referenceTime = startTime + music_delay_num;
